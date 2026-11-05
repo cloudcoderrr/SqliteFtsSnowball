@@ -76,19 +76,57 @@ namespace SqliteFtsSnowball.Internal
         }
 
         // ---------------------------------------------------------------------
-        // Native methods (resolved against the host app's SQLite build)
+        // Native methods
         // ---------------------------------------------------------------------
+        // On iOS/tvOS the e_sqlite3 provider is statically linked into the app, so its
+        // exports must be imported via the special "__Internal" pseudo-library (exactly as
+        // SQLitePCLRaw does). Everywhere else (desktop, Android, Mac Catalyst) it is a normal
+        // dynamic library named "e_sqlite3". The right variant is chosen once at runtime.
+        private const string InternalLib = "__Internal";
+
+        private static readonly bool UseInternalLinking =
+            (OperatingSystem.IsIOS() || OperatingSystem.IsTvOS())
+            && !OperatingSystem.IsMacCatalyst();
+
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "sqlite3_prepare_v2")]
-        private static extern int sqlite3_prepare_v2(IntPtr db, byte[] sql, int nByte, out IntPtr stmt, IntPtr pzTail);
+        private static extern int ext_prepare_v2(IntPtr db, byte[] sql, int nByte, out IntPtr stmt, IntPtr pzTail);
+
+        [DllImport(InternalLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "sqlite3_prepare_v2")]
+        private static extern int int_prepare_v2(IntPtr db, byte[] sql, int nByte, out IntPtr stmt, IntPtr pzTail);
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "sqlite3_bind_pointer")]
-        private static extern int sqlite3_bind_pointer(IntPtr stmt, int index, IntPtr pointer, IntPtr type, IntPtr destructor);
+        private static extern int ext_bind_pointer(IntPtr stmt, int index, IntPtr pointer, IntPtr type, IntPtr destructor);
+
+        [DllImport(InternalLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "sqlite3_bind_pointer")]
+        private static extern int int_bind_pointer(IntPtr stmt, int index, IntPtr pointer, IntPtr type, IntPtr destructor);
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "sqlite3_step")]
-        private static extern int sqlite3_step(IntPtr stmt);
+        private static extern int ext_step(IntPtr stmt);
+
+        [DllImport(InternalLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "sqlite3_step")]
+        private static extern int int_step(IntPtr stmt);
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "sqlite3_finalize")]
-        private static extern int sqlite3_finalize(IntPtr stmt);
+        private static extern int ext_finalize(IntPtr stmt);
+
+        [DllImport(InternalLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "sqlite3_finalize")]
+        private static extern int int_finalize(IntPtr stmt);
+
+        private static int sqlite3_prepare_v2(IntPtr db, byte[] sql, int nByte, out IntPtr stmt, IntPtr pzTail) =>
+            UseInternalLinking
+                ? int_prepare_v2(db, sql, nByte, out stmt, pzTail)
+                : ext_prepare_v2(db, sql, nByte, out stmt, pzTail);
+
+        private static int sqlite3_bind_pointer(IntPtr stmt, int index, IntPtr pointer, IntPtr type, IntPtr destructor) =>
+            UseInternalLinking
+                ? int_bind_pointer(stmt, index, pointer, type, destructor)
+                : ext_bind_pointer(stmt, index, pointer, type, destructor);
+
+        private static int sqlite3_step(IntPtr stmt) =>
+            UseInternalLinking ? int_step(stmt) : ext_step(stmt);
+
+        private static int sqlite3_finalize(IntPtr stmt) =>
+            UseInternalLinking ? int_finalize(stmt) : ext_finalize(stmt);
 
         // ---------------------------------------------------------------------
         // Registration

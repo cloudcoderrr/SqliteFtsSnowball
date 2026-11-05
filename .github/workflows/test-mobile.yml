@@ -81,6 +81,15 @@ jobs:
       - name: Install MAUI workloads
         run: dotnet workload install maui-android maui-ios maui-maccatalyst --skip-manifest-update
 
+      - name: Select Xcode matching the .NET iOS workload
+        run: |
+          echo 'Available Xcodes:'; ls -d /Applications/Xcode_*.app || true
+          XC=$(ls -d /Applications/Xcode_26.0*.app 2>/dev/null | sort -V | head -1)
+          if [ -z "$XC" ]; then XC=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | head -1); fi
+          echo "Selecting: $XC"
+          if [ -n "$XC" ]; then sudo xcode-select -s "$XC"; fi
+          xcodebuild -version
+
       - name: Build for iOS Simulator
         run: dotnet build ${{ env.MAUI_PROJECT }} -f net10.0-ios -c Debug -p:RuntimeIdentifier=iossimulator-arm64
 
@@ -111,6 +120,15 @@ jobs:
 
       - name: Install MAUI workloads
         run: dotnet workload install maui-android maui-ios maui-maccatalyst --skip-manifest-update
+
+      - name: Select Xcode matching the .NET iOS workload
+        run: |
+          echo 'Available Xcodes:'; ls -d /Applications/Xcode_*.app || true
+          XC=$(ls -d /Applications/Xcode_26.0*.app 2>/dev/null | sort -V | head -1)
+          if [ -z "$XC" ]; then XC=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | head -1); fi
+          echo "Selecting: $XC"
+          if [ -n "$XC" ]; then sudo xcode-select -s "$XC"; fi
+          xcodebuild -version
 
       - name: Build Mac Catalyst app
         run: dotnet build ${{ env.MAUI_PROJECT }} -f net10.0-maccatalyst -c Debug -p:RuntimeIdentifier=maccatalyst-arm64

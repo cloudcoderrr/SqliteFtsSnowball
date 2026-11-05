@@ -4,7 +4,8 @@ set -uo pipefail
 
 mkdir -p mobile-logs
 
-APP=$(find Tests/Mobile -type d -path "*maccatalyst*/*.app" | head -n 1)
+APP=$(find Tests/Mobile -type d -path "*bin*maccatalyst*/*.app" -not -path "*obj*" | head -n 1)
+if [ -z "$APP" ]; then APP=$(find Tests/Mobile -type d -path "*maccatalyst*/*.app" -not -path "*obj*" | head -n 1); fi
 echo "App bundle: $APP"
 if [ -z "$APP" ]; then echo "No .app bundle found"; exit 1; fi
 

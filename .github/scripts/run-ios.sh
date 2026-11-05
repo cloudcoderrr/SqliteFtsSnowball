@@ -5,7 +5,8 @@ set -uo pipefail
 BUNDLE=com.sqlitefts.snowball.tests
 mkdir -p mobile-logs
 
-APP=$(find Tests/Mobile -type d -path "*iossimulator*/*.app" | head -n 1)
+APP=$(find Tests/Mobile -type d -path "*bin*iossimulator*/*.app" -not -path "*obj*" | head -n 1)
+if [ -z "$APP" ]; then APP=$(find Tests/Mobile -type d -path "*iossimulator*/*.app" -not -path "*obj*" | head -n 1); fi
 echo "App bundle: $APP"
 if [ -z "$APP" ]; then echo "No .app bundle found"; exit 1; fi
 

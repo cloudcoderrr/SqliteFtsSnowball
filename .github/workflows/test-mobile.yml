@@ -91,6 +91,10 @@ jobs:
           xcodebuild -version
           ls "$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/" || true
 
+      - name: Download iOS Simulator runtime
+        timeout-minutes: 25
+        run: sudo xcodebuild -downloadPlatform iOS || xcodebuild -downloadPlatform iOS
+
       - name: Build for iOS Simulator
         run: dotnet build ${{ env.MAUI_PROJECT }} -f net10.0-ios -c Debug -p:RuntimeIdentifier=iossimulator-arm64
 

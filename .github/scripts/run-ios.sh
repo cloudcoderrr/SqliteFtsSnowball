@@ -23,8 +23,12 @@ if [ -z "$UDID" ]; then
 fi
 echo "Simulator UDID: $UDID"
 if [ -z "$UDID" ]; then echo "Could not obtain a simulator"; exit 1; fi
-xcrun simctl boot "$UDID" || true
-xcrun simctl bootstatus "$UDID" -b || true
+xcrun simctl boot "$UDID" 2>/dev/null || true
+for _ in $(seq 1 45); do
+  if xcrun simctl list devices | grep "$UDID" | grep -q Booted; then break; fi
+  sleep 2
+done
+echo "Boot state: $(xcrun simctl list devices | grep "$UDID" || true)"
 
 xcrun simctl install "$UDID" "$APP"
 
@@ -32,29 +36,26 @@ xcrun simctl install "$UDID" "$APP"
 ( xcrun simctl spawn "$UDID" log stream --level debug --predicate 'processImagePath CONTAINS "SnowballTests"' > mobile-logs/ios-syslog.txt 2>&1 ) &
 LOGPID=$!
 
-echo "Launching app (console)..."
-set +e
-SIMCTL_CHILD_SNOWBALL_CI=1 xcrun simctl launch --console-pty "$UDID" "$BUNDLE" > mobile-logs/ios-console.log 2>&1
-echo "launch returned $?"
-set -e
-
-sleep 3
-kill $LOGPID 2>/dev/null || true
-
-echo "----- console tail -----"
-tail -n 60 mobile-logs/ios-console.log 2>/dev/null || true
-echo "----- syslog tail -----"
-tail -n 40 mobile-logs/ios-syslog.txt 2>/dev/null || true
+echo "Launching app (non-blocking)..."
+SIMCTL_CHILD_SNOWBALL_CI=1 xcrun simctl launch "$UDID" "$BUNDLE" || true
 
 CONTAINER=$(xcrun simctl get_app_container "$UDID" "$BUNDLE" data 2>/dev/null || true)
 echo "Data container: $CONTAINER"
 
-RESULT=$(grep "SNOWBALL_RESULT" mobile-logs/ios-console.log 2>/dev/null | tail -n 1)
-if [ -z "$RESULT" ]; then RESULT=$(grep "SNOWBALL_RESULT" mobile-logs/ios-syslog.txt 2>/dev/null | tail -n 1); fi
-if [ -z "$RESULT" ] && [ -n "$CONTAINER" ]; then
-  FILE=$(find "$CONTAINER" -name snowball-result.txt 2>/dev/null | head -n 1)
-  if [ -n "$FILE" ]; then RESULT=$(cat "$FILE"); cp "$FILE" mobile-logs/ 2>/dev/null || true; fi
-fi
+RESULT=""
+for _ in $(seq 1 75); do
+  if [ -n "$CONTAINER" ]; then
+    FILE=$(find "$CONTAINER" -name snowball-result.txt 2>/dev/null | head -n 1)
+    if [ -n "$FILE" ]; then RESULT=$(cat "$FILE"); break; fi
+  fi
+  LINE=$(grep "SNOWBALL_RESULT" mobile-logs/ios-syslog.txt 2>/dev/null | tail -n 1)
+  if [ -n "$LINE" ]; then RESULT="$LINE"; break; fi
+  sleep 4
+done
+
+kill $LOGPID 2>/dev/null || true
+echo "----- syslog tail -----"
+tail -n 40 mobile-logs/ios-syslog.txt 2>/dev/null || true
 
 # Collect app logs and any crash reports for the artifact.
 [ -n "$CONTAINER" ] && find "$CONTAINER" -name "mobile-*.log" -exec cp {} mobile-logs/ \; 2>/dev/null || true

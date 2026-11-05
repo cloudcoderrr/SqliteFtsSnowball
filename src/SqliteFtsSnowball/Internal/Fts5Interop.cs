@@ -59,13 +59,9 @@ namespace SqliteFtsSnowball.Internal
                 return IntPtr.Zero;
             }
 
-            // On iOS/tvOS/watchOS the SQLite library is statically linked into the app, so
-            // its exports live in the main program image rather than a standalone library.
-            if (OperatingSystem.IsIOS() || OperatingSystem.IsTvOS() || OperatingSystem.IsWatchOS())
-            {
-                return GetMainProgramHandle();
-            }
-
+            // Try the configured provider name (and the default) as a normal/dynamic library
+            // first. This covers desktop, Android, and Apple platforms that ship SQLite as a
+            // loadable library or framework.
             string target = SqliteLibraryName;
             if (NativeLibrary.TryLoad(target, assembly, searchPath, out IntPtr handle))
             {
@@ -78,6 +74,8 @@ namespace SqliteFtsSnowball.Internal
                 return handle;
             }
 
+            // Statically-linked SQLite (typical on iOS/tvOS): the exports live in the main
+            // program image rather than a standalone library.
             try
             {
                 return GetMainProgramHandle();

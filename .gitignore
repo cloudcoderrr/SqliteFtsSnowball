@@ -435,3 +435,7 @@ FodyWeavers.xsd
 
 # Official VS Code C# Dev Kit Extension exclusion
 #*.lscache
+
+# local CI watch scratch
+mobile-watch.txt
+*-watch.txt

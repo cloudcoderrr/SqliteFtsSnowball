@@ -1,6 +1,7 @@
 ﻿using Android.App;
 using Android.Content.PM;
 using Android.OS;
+using Android.Runtime;
 
 namespace SnowballTests.Mobile.Maui;
 
@@ -18,9 +19,18 @@ public class MainActivity : MauiAppCompatActivity
 			Java.Lang.JavaSystem.Exit(code);
 		};
 
+		// Capture any otherwise-silent startup/runtime crash under the SNOWBALL tag.
+		AndroidEnvironment.UnhandledExceptionRaiser += (_, e) =>
+			Android.Util.Log.Error("SNOWBALL", "ANDROID UNHANDLED: " + e.Exception);
+		AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+			Android.Util.Log.Error("SNOWBALL", "DOMAIN UNHANDLED: " + e.ExceptionObject);
+		TaskScheduler.UnobservedTaskException += (_, e) =>
+			Android.Util.Log.Error("SNOWBALL", "TASK UNOBSERVED: " + e.Exception);
+
+		// Internal files dir is readable via `adb shell run-as` for debuggable builds.
 		try
 		{
-			AppState.LogDirectory = GetExternalFilesDir(null)?.AbsolutePath;
+			AppState.LogDirectory = FilesDir?.AbsolutePath;
 		}
 		catch
 		{

@@ -59,6 +59,23 @@ jobs:
           --logger "trx;LogFileName=desktop-${{ matrix.rid }}-net10.trx"
           --results-directory test-logs
 
+      - name: Install xvfb (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb libfontconfig1 libice6 libsm6
+
+      - name: Run Avalonia UI test app
+        shell: pwsh
+        env:
+          SNOWBALL_CI: '1'
+          SNOWBALL_LOG_DIR: ${{ github.workspace }}/test-logs
+        run: |
+          $proj = 'Tests/Desktop/SnowballTests.Desktop.Avalonia/SnowballTests.Desktop.Avalonia.csproj'
+          if ($IsLinux) {
+            xvfb-run -a dotnet run --project $proj -c Release -- --ci
+          } else {
+            dotnet run --project $proj -c Release -- --ci
+          }
+
       - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v4

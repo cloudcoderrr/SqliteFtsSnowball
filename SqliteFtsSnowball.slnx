@@ -3,6 +3,12 @@
     <Project Path="src/SqliteFtsSnowball/SqliteFtsSnowball.csproj" />
   </Folder>
   <Folder Name="/Tests/" />
+  <Folder Name="/Tests/Desktop/">
+    <Project Path="Tests/Desktop/SnowballTests.Desktop.Avalonia/SnowballTests.Desktop.Avalonia.csproj" />
+  </Folder>
+  <Folder Name="/Tests/Mobile/">
+    <Project Path="Tests/Mobile/SnowballTests.Mobile.Maui/SnowballTests.Mobile.Maui.csproj" />
+  </Folder>
   <Folder Name="/Tests/Shared/">
     <Project Path="Tests/Shared/SqliteFtsSnowball.TestKit/SqliteFtsSnowball.TestKit.csproj" />
   </Folder>

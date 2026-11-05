@@ -1,0 +1,127 @@
+name: test-mobile
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: test-mobile-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MAUI_PROJECT: Tests/Mobile/SnowballTests.Mobile.Maui/SnowballTests.Mobile.Maui.csproj
+  BUNDLE_ID: com.sqlitefts.snowball.tests
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Fetch & patch Snowball C# sources
+        shell: pwsh
+        run: ./scripts/fetch-snowball.ps1
+
+      - name: Install MAUI Android workload
+        run: dotnet workload restore ${{ env.MAUI_PROJECT }}
+
+      - name: Build APK
+        run: dotnet build ${{ env.MAUI_PROJECT }} -f net10.0-android -c Debug
+
+      - name: Run tests on Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          force-avd-creation: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          disable-animations: true
+          script: bash .github/scripts/run-android.sh
+
+      - name: Upload Android logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs-android
+          path: mobile-logs/**
+          if-no-files-found: warn
+
+  ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Fetch & patch Snowball C# sources
+        shell: pwsh
+        run: ./scripts/fetch-snowball.ps1
+
+      - name: Install MAUI iOS workload
+        run: dotnet workload restore ${{ env.MAUI_PROJECT }}
+
+      - name: Build for iOS Simulator
+        run: dotnet build ${{ env.MAUI_PROJECT }} -f net10.0-ios -c Debug -p:RuntimeIdentifier=iossimulator-arm64
+
+      - name: Run tests on iOS Simulator
+        run: bash .github/scripts/run-ios.sh
+
+      - name: Upload iOS logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs-ios
+          path: mobile-logs/**
+          if-no-files-found: warn
+
+  maccatalyst:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Fetch & patch Snowball C# sources
+        shell: pwsh
+        run: ./scripts/fetch-snowball.ps1
+
+      - name: Install MAUI Mac Catalyst workload
+        run: dotnet workload restore ${{ env.MAUI_PROJECT }}
+
+      - name: Build Mac Catalyst app
+        run: dotnet build ${{ env.MAUI_PROJECT }} -f net10.0-maccatalyst -c Debug -p:RuntimeIdentifier=maccatalyst-arm64
+
+      - name: Run Mac Catalyst tests
+        run: bash .github/scripts/run-maccatalyst.sh
+
+      - name: Upload Mac Catalyst logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs-maccatalyst
+          path: mobile-logs/**
+          if-no-files-found: warn

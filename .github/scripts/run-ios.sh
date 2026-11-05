@@ -32,20 +32,24 @@ echo "Boot state: $(xcrun simctl list devices | grep "$UDID" || true)"
 
 xcrun simctl install "$UDID" "$APP"
 
-echo "Launching app (non-blocking)..."
-SIMCTL_CHILD_SNOWBALL_CI=1 xcrun simctl launch "$UDID" "$BUNDLE" || true
+# `simctl launch` can block indefinitely on some runners, so run it in the background and
+# poll the app's result file concurrently (the app writes it a few seconds into the run).
+echo "Launching app..."
+( SIMCTL_CHILD_SNOWBALL_CI=1 xcrun simctl launch --terminate-running-process "$UDID" "$BUNDLE" ) >/dev/null 2>&1 &
+LPID=$!
 
-CONTAINER=$(xcrun simctl get_app_container "$UDID" "$BUNDLE" data 2>/dev/null || true)
-echo "Data container: $CONTAINER"
-
+CONTAINER=""
 RESULT=""
 for _ in $(seq 1 75); do
+  if [ -z "$CONTAINER" ]; then CONTAINER=$(xcrun simctl get_app_container "$UDID" "$BUNDLE" data 2>/dev/null || true); fi
   if [ -n "$CONTAINER" ]; then
     FILE=$(find "$CONTAINER" -name snowball-result.txt 2>/dev/null | head -n 1)
     if [ -n "$FILE" ]; then RESULT=$(cat "$FILE"); break; fi
   fi
   sleep 4
 done
+kill "$LPID" 2>/dev/null || true
+echo "Data container: $CONTAINER"
 
 # Collect the app's own log + result + any crash report for the artifact.
 if [ -n "$CONTAINER" ]; then

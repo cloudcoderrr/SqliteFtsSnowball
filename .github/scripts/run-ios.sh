@@ -32,10 +32,6 @@ echo "Boot state: $(xcrun simctl list devices | grep "$UDID" || true)"
 
 xcrun simctl install "$UDID" "$APP"
 
-# Capture the simulator system log for our process in the background.
-( xcrun simctl spawn "$UDID" log stream --level debug --predicate 'processImagePath CONTAINS "SnowballTests"' > mobile-logs/ios-syslog.txt 2>&1 ) &
-LOGPID=$!
-
 echo "Launching app (non-blocking)..."
 SIMCTL_CHILD_SNOWBALL_CI=1 xcrun simctl launch "$UDID" "$BUNDLE" || true
 
@@ -48,21 +44,19 @@ for _ in $(seq 1 75); do
     FILE=$(find "$CONTAINER" -name snowball-result.txt 2>/dev/null | head -n 1)
     if [ -n "$FILE" ]; then RESULT=$(cat "$FILE"); break; fi
   fi
-  LINE=$(grep "SNOWBALL_RESULT" mobile-logs/ios-syslog.txt 2>/dev/null | tail -n 1)
-  if [ -n "$LINE" ]; then RESULT="$LINE"; break; fi
   sleep 4
 done
 
-kill $LOGPID 2>/dev/null || true
-echo "----- syslog tail -----"
-tail -n 40 mobile-logs/ios-syslog.txt 2>/dev/null || true
-
-# Collect app logs and any crash reports for the artifact.
-[ -n "$CONTAINER" ] && find "$CONTAINER" -name "mobile-*.log" -exec cp {} mobile-logs/ \; 2>/dev/null || true
+# Collect the app's own log + result + any crash report for the artifact.
+if [ -n "$CONTAINER" ]; then
+  find "$CONTAINER" \( -name "mobile-*.log" -o -name "snowball-result.txt" \) -exec cp {} mobile-logs/ \; 2>/dev/null || true
+fi
 cp "$HOME"/Library/Logs/DiagnosticReports/*SnowballTests* mobile-logs/ 2>/dev/null || true
 
+echo "----- app log tail -----"
+tail -n 25 mobile-logs/mobile-*.log 2>/dev/null || true
+
 xcrun simctl shutdown "$UDID" 2>/dev/null || true
-xcrun simctl delete "$UDID" 2>/dev/null || true
 
 echo "----- RESULT -----"
 echo "$RESULT"

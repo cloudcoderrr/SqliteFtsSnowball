@@ -1,0 +1,197 @@
+{
+  "snowballDataSha": "019921c3a41c2b70063ee3feb215a00c8e594597",
+  "snowballVersion": "3.2.0",
+  "maxPerLanguage": 1000,
+  "languages": [
+    {
+      "name": "arabic",
+      "file": "stemming/arabic.tsv",
+      "count": 1000
+    },
+    {
+      "name": "armenian",
+      "file": "stemming/armenian.tsv",
+      "count": 1000
+    },
+    {
+      "name": "basque",
+      "file": "stemming/basque.tsv",
+      "count": 1000
+    },
+    {
+      "name": "catalan",
+      "file": "stemming/catalan.tsv",
+      "count": 1000
+    },
+    {
+      "name": "czech",
+      "file": "stemming/czech.tsv",
+      "count": 1000
+    },
+    {
+      "name": "danish",
+      "file": "stemming/danish.tsv",
+      "count": 1000
+    },
+    {
+      "name": "dutch",
+      "file": "stemming/dutch.tsv",
+      "count": 1000
+    },
+    {
+      "name": "dutch_porter",
+      "file": "stemming/dutch_porter.tsv",
+      "count": 1000
+    },
+    {
+      "name": "earlymodernenglish",
+      "file": "stemming/earlymodernenglish.tsv",
+      "count": 1000
+    },
+    {
+      "name": "english",
+      "file": "stemming/english.tsv",
+      "count": 1000
+    },
+    {
+      "name": "esperanto",
+      "file": "stemming/esperanto.tsv",
+      "count": 1000
+    },
+    {
+      "name": "estonian",
+      "file": "stemming/estonian.tsv",
+      "count": 1000
+    },
+    {
+      "name": "finnish",
+      "file": "stemming/finnish.tsv",
+      "count": 1000
+    },
+    {
+      "name": "french",
+      "file": "stemming/french.tsv",
+      "count": 1000
+    },
+    {
+      "name": "german",
+      "file": "stemming/german.tsv",
+      "count": 1000
+    },
+    {
+      "name": "greek",
+      "file": "stemming/greek.tsv",
+      "count": 1000
+    },
+    {
+      "name": "hindi",
+      "file": "stemming/hindi.tsv",
+      "count": 1000
+    },
+    {
+      "name": "hungarian",
+      "file": "stemming/hungarian.tsv",
+      "count": 1000
+    },
+    {
+      "name": "indonesian",
+      "file": "stemming/indonesian.tsv",
+      "count": 1000
+    },
+    {
+      "name": "irish",
+      "file": "stemming/irish.tsv",
+      "count": 1000
+    },
+    {
+      "name": "italian",
+      "file": "stemming/italian.tsv",
+      "count": 1000
+    },
+    {
+      "name": "lithuanian",
+      "file": "stemming/lithuanian.tsv",
+      "count": 1000
+    },
+    {
+      "name": "nepali",
+      "file": "stemming/nepali.tsv",
+      "count": 1000
+    },
+    {
+      "name": "norwegian",
+      "file": "stemming/norwegian.tsv",
+      "count": 1000
+    },
+    {
+      "name": "persian",
+      "file": "stemming/persian.tsv",
+      "count": 1000
+    },
+    {
+      "name": "polish",
+      "file": "stemming/polish.tsv",
+      "count": 1000
+    },
+    {
+      "name": "porter",
+      "file": "stemming/porter.tsv",
+      "count": 1000
+    },
+    {
+      "name": "portuguese",
+      "file": "stemming/portuguese.tsv",
+      "count": 1000
+    },
+    {
+      "name": "romanian",
+      "file": "stemming/romanian.tsv",
+      "count": 1000
+    },
+    {
+      "name": "russian",
+      "file": "stemming/russian.tsv",
+      "count": 1000
+    },
+    {
+      "name": "serbian",
+      "file": "stemming/serbian.tsv",
+      "count": 1000
+    },
+    {
+      "name": "sesotho",
+      "file": "stemming/sesotho.tsv",
+      "count": 1000
+    },
+    {
+      "name": "spanish",
+      "file": "stemming/spanish.tsv",
+      "count": 1000
+    },
+    {
+      "name": "swedish",
+      "file": "stemming/swedish.tsv",
+      "count": 1000
+    },
+    {
+      "name": "tamil",
+      "file": "stemming/tamil.tsv",
+      "count": 1000
+    },
+    {
+      "name": "turkish",
+      "file": "stemming/turkish.tsv",
+      "count": 1000
+    },
+    {
+      "name": "ukrainian",
+      "file": "stemming/ukrainian.tsv",
+      "count": 1000
+    },
+    {
+      "name": "yiddish",
+      "file": "stemming/yiddish.tsv",
+      "count": 1000
+    }
+  ]
+}

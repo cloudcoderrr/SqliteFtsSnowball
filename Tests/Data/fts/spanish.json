@@ -1,0 +1,15 @@
+{
+  "name": "spanish",
+  "tokenize": "snowball spanish",
+  "columns": ["body"],
+  "documents": [
+    { "id": 1, "values": ["Yo hablo, t\u00fa hablas, \u00e9l habl\u00f3 y estamos hablando."] },
+    { "id": 2, "values": ["El gato duerme. Los gatos cazan ratones."] },
+    { "id": 3, "values": ["El perro ladra. Los perros corren r\u00e1pido."] }
+  ],
+  "queries": [
+    { "match": "hablar", "expected": [1], "note": "hablo/hablas/habl\u00f3/hablando conflate to habl" },
+    { "match": "gato", "expected": [2], "note": "gato/gatos" },
+    { "match": "perros", "expected": [3], "note": "perro/perros" }
+  ]
+}

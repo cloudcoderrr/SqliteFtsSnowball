@@ -1,0 +1,18 @@
+{
+  "name": "raw-none",
+  "tokenize": "snowball none",
+  "columns": ["body"],
+  "documents": [
+    { "id": 1, "values": ["Hello WORLD 123 caf\u00e9"] },
+    { "id": 2, "values": ["running runner ran"] }
+  ],
+  "queries": [
+    { "match": "hello", "expected": [1], "note": "case folded" },
+    { "match": "world", "expected": [1], "note": "case folded" },
+    { "match": "123", "expected": [1], "note": "number token" },
+    { "match": "caf\u00e9", "expected": [1], "note": "exact accented token" },
+    { "match": "cafe", "expected": [], "note": "no diacritic folding by default" },
+    { "match": "running", "expected": [2], "note": "exact, no stemming" },
+    { "match": "run", "expected": [], "note": "no stemming so 'run' != 'running'/'ran'" }
+  ]
+}

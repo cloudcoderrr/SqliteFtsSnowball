@@ -3,6 +3,15 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# SqliteFtsSnowball: local staging for downloaded Snowball sources (never committed)
+.tools-staging/
+# Vendored/generated Snowball C# sources are fetched at build time by scripts/fetch-snowball.ps1
+src/SqliteFtsSnowball/Generated/
+# Test log output produced by the test runners (collected as CI artifacts)
+test-logs/
+TestResults/
+artifacts-ci/
+
 # User-specific files
 *.rsuser
 *.suo

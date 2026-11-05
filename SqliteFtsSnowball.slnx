@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SqliteFtsSnowball/SqliteFtsSnowball.csproj" />
+  </Folder>
+  <Folder Name="/Tests/" />
+  <Folder Name="/Tests/Shared/">
+    <Project Path="Tests/Shared/SqliteFtsSnowball.TestKit/SqliteFtsSnowball.TestKit.csproj" />
+  </Folder>
+  <Folder Name="/Tests/Unit/">
+    <Project Path="Tests/Unit/SqliteFtsSnowball.Tests/SqliteFtsSnowball.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,16 @@
+{
+  "name": "french",
+  "tokenize": "snowball french",
+  "columns": ["body"],
+  "documents": [
+    { "id": 1, "values": ["Le chat dort. Les chats chassent les souris."] },
+    { "id": 2, "values": ["Je parle, tu parles, il parlait, ils parlent et nous allons parler."] },
+    { "id": 3, "values": ["Les chiens aboient dans le jardin."] }
+  ],
+  "queries": [
+    { "match": "chat", "expected": [1], "note": "chat/chats share a stem" },
+    { "match": "parler", "expected": [2], "note": "parler/parle/parlait/parlent conflate" },
+    { "match": "parle", "expected": [2], "note": "same verb, different surface form" },
+    { "match": "chien", "expected": [3], "note": "chiens -> chien" }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "german",
+  "tokenize": "snowball german",
+  "columns": ["body"],
+  "documents": [
+    { "id": 1, "values": ["Wir spielen Fu\u00dfball. Er spielt gut und spielte gestern."] },
+    { "id": 2, "values": ["Die Katze schl\u00e4ft. Zwei Katzen jagen M\u00e4use."] },
+    { "id": 3, "values": ["Der Hund bellt. Viele Hunde laufen im Park."] }
+  ],
+  "queries": [
+    { "match": "spielen", "expected": [1], "note": "spielen/spielt/spielte conflate" },
+    { "match": "spielt", "expected": [1], "note": "same verb" },
+    { "match": "katze", "expected": [2], "note": "Katze/Katzen" },
+    { "match": "hund", "expected": [3], "note": "Hund/Hunde" }
+  ]
+}

@@ -1,0 +1,68 @@
+name: test-desktop
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: test-desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.rid }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,    rid: linux-x64 }
+          - { os: ubuntu-24.04-arm, rid: linux-arm64 }
+          - { os: windows-latest,   rid: win-x64 }
+          - { os: windows-11-arm,   rid: win-arm64 }
+          - { os: macos-13,         rid: osx-x64 }
+          - { os: macos-latest,     rid: osx-arm64 }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Fetch & patch Snowball C# sources
+        shell: pwsh
+        run: ./scripts/fetch-snowball.ps1
+
+      - name: Test (net8.0)
+        shell: pwsh
+        env:
+          SNOWBALL_LOG_DIR: ${{ github.workspace }}/test-logs
+        run: >
+          dotnet test Tests/Unit/SqliteFtsSnowball.Tests/SqliteFtsSnowball.Tests.csproj
+          -c Release -f net8.0
+          --logger "trx;LogFileName=desktop-${{ matrix.rid }}-net8.trx"
+          --results-directory test-logs
+
+      - name: Test (net10.0)
+        shell: pwsh
+        env:
+          SNOWBALL_LOG_DIR: ${{ github.workspace }}/test-logs
+        run: >
+          dotnet test Tests/Unit/SqliteFtsSnowball.Tests/SqliteFtsSnowball.Tests.csproj
+          -c Release -f net10.0
+          --logger "trx;LogFileName=desktop-${{ matrix.rid }}-net10.trx"
+          --results-directory test-logs
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs-${{ matrix.rid }}
+          path: test-logs/**
+          if-no-files-found: warn

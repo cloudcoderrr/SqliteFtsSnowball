@@ -1,0 +1,23 @@
+{
+  "name": "english-basic",
+  "tokenize": "snowball english",
+  "columns": ["title", "body"],
+  "documents": [
+    { "id": 1, "values": ["Running Club", "Our runners run every morning; running keeps them fit."] },
+    { "id": 2, "values": ["Database", "He connected the service; connection pooling and connecting matter."] },
+    { "id": 3, "values": ["Foxes", "A quick brown fox jumps; foxes are quick and clever."] },
+    { "id": 4, "values": ["Baking", "She bakes bread and baked a cake while baking cookies."] },
+    { "id": 5, "values": ["Studies", "The student studies daily; she studied and is studying hard."] }
+  ],
+  "queries": [
+    { "match": "run", "expected": [1], "note": "running/run share stem 'run' (runners->runner does not)" },
+    { "match": "runner", "expected": [1], "note": "runners -> runner" },
+    { "match": "connect", "expected": [2], "note": "connected/connection/connecting -> connect" },
+    { "match": "quick", "expected": [3], "note": "quick (quickly would also stem to quick)" },
+    { "match": "fox", "expected": [3], "note": "fox/foxes -> fox" },
+    { "match": "bake", "expected": [4], "note": "bakes/baked/baking -> bake" },
+    { "match": "study", "expected": [5], "note": "study/studies/studied/studying -> studi" },
+    { "match": "fit", "expected": [1], "note": "fit" },
+    { "match": "missing", "expected": [], "note": "no document matches" }
+  ]
+}

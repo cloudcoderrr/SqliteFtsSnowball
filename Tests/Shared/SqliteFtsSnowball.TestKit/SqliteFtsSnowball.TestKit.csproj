@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>SqliteFtsSnowball.TestKit</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.14" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\SqliteFtsSnowball\SqliteFtsSnowball.csproj" />
+  </ItemGroup>
+
+  <!-- Embed the ground-truth test data so the suite runs identically on desktop and mobile. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\Data\stemming\*.tsv" LogicalName="snowball.stemming.%(Filename).tsv" />
+    <EmbeddedResource Include="..\..\Data\fts\*.json" LogicalName="snowball.fts.%(Filename).json" />
+    <EmbeddedResource Include="..\..\Data\manifest.json" LogicalName="snowball.manifest.json" />
+  </ItemGroup>
+
+</Project>

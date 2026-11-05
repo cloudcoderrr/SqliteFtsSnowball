@@ -1,0 +1,22 @@
+{
+  "name": "english-operators",
+  "tokenize": "snowball english",
+  "columns": ["title", "body"],
+  "documents": [
+    { "id": 1, "values": ["Running Club", "Our runners run every morning; running keeps them fit."] },
+    { "id": 2, "values": ["Database", "He connected the service; connection pooling and connecting matter."] },
+    { "id": 3, "values": ["Foxes", "A quick brown fox jumps; foxes are quick and clever."] },
+    { "id": 4, "values": ["Baking", "She bakes bread and baked a cake while baking cookies."] },
+    { "id": 5, "values": ["Mixed", "A clever baker connected quick ideas while running."] }
+  ],
+  "queries": [
+    { "match": "quick AND fox", "expected": [3], "note": "boolean AND" },
+    { "match": "connection OR baking", "expected": [2, 4, 5], "note": "OR: connect-stem (docs 2,5) union bake-stem (doc 4)" },
+    { "match": "run NOT morning", "expected": [5], "note": "doc1 excluded by NOT morning" },
+    { "match": "clever AND connect", "expected": [5], "note": "AND across two stems in one doc" },
+    { "match": "\"brown fox\"", "expected": [3], "note": "phrase query" },
+    { "match": "connec*", "expected": [2, 5], "note": "prefix query" },
+    { "match": "title:run", "expected": [1], "note": "column filter on title" },
+    { "match": "NEAR(quick fox, 3)", "expected": [3], "note": "NEAR proximity" }
+  ]
+}

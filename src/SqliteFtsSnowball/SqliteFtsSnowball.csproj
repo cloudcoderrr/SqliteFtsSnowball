@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net8.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RootNamespace>SqliteFtsSnowball</RootNamespace>
+    <AssemblyName>SqliteFtsSnowball</AssemblyName>
+
+    <!-- Packaging -->
+    <IsPackable>true</IsPackable>
+    <PackageId>SqliteFtsSnowball</PackageId>
+    <Title>SQLite FTS5 Snowball tokenizer</Title>
+    <Description>A production-ready SQLite FTS5 custom tokenizer that applies Snowball (libstemmer) stemming for 30+ languages. Pure managed, works everywhere SQLitePCLRaw works: Windows (Win32/WinUI3), Linux, macOS, Mac Catalyst, iOS and Android (via .NET MAUI), and Avalonia.</Description>
+    <PackageTags>sqlite;fts5;fts;full-text-search;snowball;libstemmer;stemmer;stemming;tokenizer;maui;avalonia;winui;search</PackageTags>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- Trimming / AOT friendliness (the factory uses no reflection). -->
+    <IsAotCompatible Condition="'$(TargetFramework)' != 'netstandard2.0'">true</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SQLitePCLRaw.core" Version="2.1.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" Condition="Exists('..\..\README.md')" />
+    <None Include="..\..\THIRD-PARTY-NOTICES.txt" Pack="true" PackagePath="\" Condition="Exists('..\..\THIRD-PARTY-NOTICES.txt')" />
+  </ItemGroup>
+
+  <!-- Fail fast with a helpful message if the Snowball sources have not been fetched. -->
+  <Target Name="EnsureSnowballSources" BeforeTargets="BeforeCompile;CoreCompile">
+    <Error Condition="!Exists('$(MSBuildProjectDirectory)\Generated\.snowball-version')"
+           Text="Snowball C# sources are missing. Run:  pwsh ./scripts/fetch-snowball.ps1   (see README.md / patches/libstemmer_csharp)." />
+  </Target>
+
+</Project>

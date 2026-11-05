@@ -92,8 +92,16 @@ jobs:
           ls "$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/" || true
 
       - name: Download iOS Simulator runtime
-        timeout-minutes: 25
-        run: sudo xcodebuild -downloadPlatform iOS || xcodebuild -downloadPlatform iOS
+        timeout-minutes: 30
+        run: |
+          echo 'Runtimes before:'; xcrun simctl list runtimes || true
+          ok=0
+          for i in 1 2 3 4; do
+            if sudo xcodebuild -downloadPlatform iOS; then ok=1; break; fi
+            echo "download attempt $i failed; retrying in 30s"; sleep 30
+          done
+          echo 'Runtimes after:'; xcrun simctl list runtimes || true
+          if [ "$ok" != "1" ]; then echo 'Failed to download iOS runtime after retries'; exit 1; fi
 
       - name: Build for iOS Simulator
         run: dotnet build ${{ env.MAUI_PROJECT }} -f net10.0-ios -c Debug -p:RuntimeIdentifier=iossimulator-arm64

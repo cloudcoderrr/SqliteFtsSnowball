@@ -2,6 +2,7 @@
 
 [![build-nuget](https://github.com/cloudcoderrr/SqliteFtsSnowball/actions/workflows/build-nuget.yml/badge.svg)](https://github.com/cloudcoderrr/SqliteFtsSnowball/actions/workflows/build-nuget.yml)
 [![test-desktop](https://github.com/cloudcoderrr/SqliteFtsSnowball/actions/workflows/test-desktop.yml/badge.svg)](https://github.com/cloudcoderrr/SqliteFtsSnowball/actions/workflows/test-desktop.yml)
+[![test-mobile](https://github.com/cloudcoderrr/SqliteFtsSnowball/actions/workflows/test-mobile.yml/badge.svg)](https://github.com/cloudcoderrr/SqliteFtsSnowball/actions/workflows/test-mobile.yml)
 
 A production-ready **SQLite FTS5 custom tokenizer** that applies **Snowball** (`libstemmer`)
 stemming for **38 languages**, plus a direct stemming API. It lets full-text search match
@@ -151,7 +152,43 @@ dotnet test Tests/Unit/SqliteFtsSnowball.Tests -f net10.0
 ```
 
 Ground-truth test data lives in [`Tests/Data`](Tests/Data) (regenerate with
-[`scripts/fetch-testdata.ps1`](scripts/fetch-testdata.ps1)).
+[`scripts/fetch-testdata.ps1`](scripts/fetch-testdata.ps1)). It contains the authoritative
+`snowball-data` word → stem vectors for every language plus hand-authored FTS5 search
+scenarios. The shared [`SqliteFtsSnowball.TestKit`](Tests/Shared/SqliteFtsSnowball.TestKit)
+runs three suites — stemming vectors, end-to-end FTS5 search scenarios, and focused tokenizer
+behavior — and writes a detailed log file.
+
+The same TestKit is driven by three front-ends:
+
+| Project | Runs on |
+| --- | --- |
+| [`SqliteFtsSnowball.Tests`](Tests/Unit/SqliteFtsSnowball.Tests) (xUnit) | CI on all desktop OSes |
+| [`SnowballTests.Desktop.Avalonia`](Tests/Desktop/SnowballTests.Desktop.Avalonia) | Windows, Linux, macOS (interactive UI, or `--ci`) |
+| [`SnowballTests.Mobile.Maui`](Tests/Mobile/SnowballTests.Mobile.Maui) | iOS, Android, Mac Catalyst |
+
+## Repository layout
+
+```
+src/SqliteFtsSnowball/            the NuGet library (stemmers + FTS5 tokenizer)
+scripts/fetch-snowball.ps1        downloads + patches the Snowball C# sources
+scripts/fetch-testdata.ps1        regenerates the ground-truth test data
+patches/libstemmer_csharp/        unified-diff patches applied to the Snowball sources
+Tests/Data/                       committed ground-truth test data
+Tests/Shared/…TestKit/            shared test logic + logging (embeds Tests/Data)
+Tests/Unit/…Tests/                xUnit tests
+Tests/Desktop/…Avalonia/          Avalonia desktop test app
+Tests/Mobile/…Maui/               .NET MAUI mobile test app
+.github/workflows/                build + desktop + mobile CI
+```
+
+## Continuous integration
+
+- **build-nuget** — fetches/patches Snowball, packs the NuGet, and on a `v*` tag publishes it
+  to the GitHub Releases page.
+- **test-desktop** — xUnit + the Avalonia app (headless) on Windows, Linux and macOS, on both
+  **x64 and arm64**, for `net8.0` and `net10.0`.
+- **test-mobile** — the MAUI app on an **Android emulator**, an **iOS Simulator**, and **Mac
+  Catalyst**. Logs from every run are uploaded as build artifacts.
 
 ## License
 

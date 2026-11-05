@@ -65,7 +65,7 @@ jobs:
           if-no-files-found: warn
 
   ios:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
 
@@ -78,8 +78,8 @@ jobs:
         shell: pwsh
         run: ./scripts/fetch-snowball.ps1
 
-      - name: Install MAUI iOS workload
-        run: dotnet workload install maui-ios --skip-manifest-update
+      - name: Install MAUI workloads
+        run: dotnet workload install maui-android maui-ios maui-maccatalyst --skip-manifest-update
 
       - name: Build for iOS Simulator
         run: dotnet build ${{ env.MAUI_PROJECT }} -f net10.0-ios -c Debug -p:RuntimeIdentifier=iossimulator-arm64
@@ -96,7 +96,7 @@ jobs:
           if-no-files-found: warn
 
   maccatalyst:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
 
@@ -109,8 +109,8 @@ jobs:
         shell: pwsh
         run: ./scripts/fetch-snowball.ps1
 
-      - name: Install MAUI Mac Catalyst workload
-        run: dotnet workload install maui-maccatalyst --skip-manifest-update
+      - name: Install MAUI workloads
+        run: dotnet workload install maui-android maui-ios maui-maccatalyst --skip-manifest-update
 
       - name: Build Mac Catalyst app
         run: dotnet build ${{ env.MAUI_PROJECT }} -f net10.0-maccatalyst -c Debug -p:RuntimeIdentifier=maccatalyst-arm64

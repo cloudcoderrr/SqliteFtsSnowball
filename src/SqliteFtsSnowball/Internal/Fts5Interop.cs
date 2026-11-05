@@ -59,40 +59,20 @@ namespace SqliteFtsSnowball.Internal
                 return IntPtr.Zero;
             }
 
-            // Try the configured provider name (and the default) as a normal/dynamic library
-            // first. This covers desktop, Android, and Apple platforms that ship SQLite as a
-            // loadable library or framework.
-            string target = SqliteLibraryName;
-            if (NativeLibrary.TryLoad(target, assembly, searchPath, out IntPtr handle))
-            {
-                return handle;
-            }
-
-            if (!string.Equals(target, Lib, StringComparison.Ordinal) &&
-                NativeLibrary.TryLoad(Lib, assembly, searchPath, out handle))
-            {
-                return handle;
-            }
-
-            // Statically-linked SQLite (typical on iOS/tvOS): the exports live in the main
-            // program image rather than a standalone library.
-            try
-            {
-                return GetMainProgramHandle();
-            }
-            catch
+            // For the default provider, defer to the runtime's normal resolution so our
+            // P/Invokes bind to exactly the same native SQLite as the app's SQLitePCLRaw
+            // provider. This is critical on iOS: a custom resolver using the main program
+            // handle would bind "e_sqlite3" to the system libsqlite3 instead of the bundled
+            // e_sqlite3, which crashes in sqlite3_bind_pointer.
+            if (string.Equals(SqliteLibraryName, Lib, StringComparison.Ordinal))
             {
                 return IntPtr.Zero;
             }
-        }
 
-        private static IntPtr GetMainProgramHandle()
-        {
-#if NET7_0_OR_GREATER
-            return NativeLibrary.GetMainProgramHandle();
-#else
-            return NativeLibrary.Load(Lib);
-#endif
+            // Custom provider name (e.g. winsqlite3, sqlcipher): load it explicitly.
+            return NativeLibrary.TryLoad(SqliteLibraryName, assembly, searchPath, out IntPtr handle)
+                ? handle
+                : IntPtr.Zero;
         }
 
         // ---------------------------------------------------------------------

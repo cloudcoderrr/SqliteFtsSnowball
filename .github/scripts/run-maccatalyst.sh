@@ -14,8 +14,10 @@ EXE="$APP/Contents/MacOS/$EXE_NAME"
 echo "Executable: $EXE"
 chmod +x "$EXE" 2>/dev/null || true
 
+# Note: macOS has no `timeout`; the app exits itself in CI mode. The workflow step
+# provides a hard time limit.
 set +e
-SNOWBALL_CI=1 timeout 400 "$EXE" > mobile-logs/maccatalyst-output.log 2>&1
+SNOWBALL_CI=1 "$EXE" > mobile-logs/maccatalyst-output.log 2>&1
 CODE=$?
 set -e
 echo "Process exit code: $CODE"

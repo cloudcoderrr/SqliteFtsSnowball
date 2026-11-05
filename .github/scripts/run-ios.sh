@@ -11,13 +11,20 @@ echo "App bundle: $APP"
 if [ -z "$APP" ]; then echo "No .app bundle found"; exit 1; fi
 
 RUNTIME=$(xcrun simctl list runtimes available | grep -Eo 'com.apple.CoreSimulator.SimRuntime.iOS[-0-9]+' | tail -n 1)
-DEVTYPE=$(xcrun simctl list devicetypes | grep -Eo 'com.apple.CoreSimulator.SimDeviceType.iPhone-[0-9]+' | tail -n 1)
-echo "Runtime: $RUNTIME  DeviceType: $DEVTYPE"
+echo "Runtime: $RUNTIME"
 
-UDID=$(xcrun simctl create snowball-sim "$DEVTYPE" "$RUNTIME")
+# Prefer an already-available iPhone simulator (any iOS runtime); the app targets a
+# lower iOS SDK and runs fine on newer runtimes. Fall back to creating one.
+UDID=$(xcrun simctl list devices available --json | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next((dev['udid'] for rt in sorted(d) if 'iOS' in rt for dev in d[rt] if 'iPhone' in dev.get('name','')), ''))")
+if [ -z "$UDID" ]; then
+  DEVTYPE=$(xcrun simctl list devicetypes --json | python3 -c "import json,sys; d=json.load(sys.stdin)['devicetypes']; ps=[t['identifier'] for t in d if 'iPhone' in t.get('name','')]; print(ps[-1] if ps else '')")
+  echo "Creating simulator: $DEVTYPE on $RUNTIME"
+  UDID=$(xcrun simctl create snowball-sim "$DEVTYPE" "$RUNTIME")
+fi
 echo "Simulator UDID: $UDID"
-xcrun simctl boot "$UDID"
-xcrun simctl bootstatus "$UDID" -b
+if [ -z "$UDID" ]; then echo "Could not obtain a simulator"; exit 1; fi
+xcrun simctl boot "$UDID" || true
+xcrun simctl bootstatus "$UDID" -b || true
 
 xcrun simctl install "$UDID" "$APP"
 SIMCTL_CHILD_SNOWBALL_CI=1 xcrun simctl launch "$UDID" "$BUNDLE" || true
